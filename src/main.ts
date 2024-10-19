@@ -1,23 +1,27 @@
-import './style.css'
+import { MovableElment, type State } from './classes/movable-element';
+import './style.css';
 
-const getMovableElement = (element: HTMLElement) => {
-  element.style.position = 'absolute';
-  element.addEventListener('mousedown', handleMouseDown);
-  document.body.addEventListener('mouseup', handleMouseUp)
-};
+const movableElement = new MovableElment(document.getElementById('movable'));
 
-const handleMouseDown = (event: MouseEvent) => {
-  console.log(event);
-  event.target?.addEventListener('mousemove', handleMouseMove);
-};
+document.getElementById('toggleButton')?.addEventListener('click', () => {
+	const handler: Record<State, () => void> = {
+		movable: movableElement.clearEventListener,
+		static: movableElement.initMovable
+	};
+	handler[movableElement.state]();
 
-const handleMouseMove = (event: Event) => {
-  console.log(event);
-};
+	// switch (movableElement.state) {
+	// 	case 'movable':
+	// 		movableElement.clearEventListener();
+	// 		break;
+	// 	case 'static':
+	// 		movableElement.initMovable();
+	// 		break;
+	// }
 
-const handleMouseUp = (event: MouseEvent) => {
-  document.body .removeEventListener('mousemove', handleMouseMove);
-  console.log(event);
-}
-
-getMovableElement(document.getElementById('movable')!);
+	// if (movableElement.state === 'movable') {
+	// 	movableElement.clearEventListener();
+	// } else {
+	// 	movableElement.initMovable();
+	// }
+});
