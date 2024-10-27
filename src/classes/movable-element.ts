@@ -1,14 +1,16 @@
 export type State = 'movable' | 'static';
+type Offset = {
+	x: number;
+	y: number;
+};
 export class MovableElment {
 	private element: HTMLElement | null = null;
-	private offset: {
-		x: number;
-		y: number;
-	} = {
+	private offset: Offset = {
 		x: 0,
 		y: 0
 	};
 	private $state: State = 'static';
+	private handler: ((element: typeof this.element, XY: Offset) => void) | null = null;
 
 	constructor(element: HTMLElement | null) {
 		if (element) {
@@ -17,9 +19,7 @@ export class MovableElment {
 	}
 
 	set state(value: State) {
-		console.log(this.$state);
 		this.$state = value;
-		console.log(this.$state);
 	}
 
 	get state() {
@@ -27,6 +27,7 @@ export class MovableElment {
 	}
 
 	private handleMouseDown = (event: MouseEvent) => {
+		event.stopPropagation();
 		event.preventDefault();
 		if (this.element) {
 			this.element.style.position = 'absolute';
@@ -39,46 +40,31 @@ export class MovableElment {
 	};
 
 	private handleMouseMove = (event: MouseEvent) => {
+		event.stopPropagation();
 		event.preventDefault();
-		if (
-			window.innerHeight < event.clientY ||
-			window.innerWidth < event.clientX ||
-			event.clientX < 0 ||
-			event.clientY < 0
-		) {
-			document.removeEventListener('pointermove', this.handleMouseMove);
-			return;
-		}
 		if (this.element) {
-			const { right, left, bottom, top, width, height } =
-				this.element.getBoundingClientRect();
-
-			let x: number =
-				right > window.innerWidth
-					? window.innerWidth - width
-					: left < 0
-					? 0
-					: event.clientX - this.offset.x;
-			let y: number =
-				bottom > window.innerHeight
-					? window.innerHeight - height
-					: top < 0
-					? 0
-					: event.clientY - this.offset.y;
-
-			this.element!.style.left = x + 'px';
-			this.element!.style.top = y + 'px';
+			this.element!.style.left = event.clientX - this.offset.x + 'px';
+			this.element!.style.top = event.clientY - this.offset.y + 'px';
 		}
 	};
 
 	private handleMouseUp = (event: MouseEvent) => {
+		event.stopPropagation();
 		event.preventDefault();
 		if (this.element) {
+			this.element.style.position = '';
+			this.element.style.left = '';
+			this.element.style.top = '';
+			this.handler?.(this.element, {
+				x: event.clientX,
+				y: event.clientY
+			});
 			document.removeEventListener('pointermove', this.handleMouseMove);
 		}
 	};
 
-	initMovable = () => {
+	initMovable = (handler?: typeof this.handler) => {
+		this.handler = handler ?? null;
 		if (this.element) {
 			this.element.addEventListener('pointerdown', this.handleMouseDown);
 			document.addEventListener('pointerup', this.handleMouseUp);
@@ -90,7 +76,7 @@ export class MovableElment {
 		if (this.element) {
 			document.removeEventListener('pointermove', this.handleMouseMove);
 			document.removeEventListener('pointerup', this.handleMouseUp);
-			this.element.removeEventListener('pointerdown', this.handleMouseUp);
+			this.element.removeEventListener('pointerdown', this.handleMouseDown);
 		}
 		this.state = 'static';
 	};

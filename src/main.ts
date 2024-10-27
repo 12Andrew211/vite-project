@@ -6,7 +6,17 @@ const movableElement = new MovableElment(document.getElementById('movable'));
 document.getElementById('toggleButton')?.addEventListener('click', () => {
 	const handler: Record<State, () => void> = {
 		movable: movableElement.clearEventListener,
-		static: movableElement.initMovable
+		static: () =>
+			movableElement.initMovable((elem, { x, y }) => {
+				const zones = document.querySelectorAll('.zone');
+				const currentZone = Array.from(zones).find((zone) => {
+					const { right, bottom, top, left } = zone.getBoundingClientRect();
+					return x < right && x > left && y > top && y < bottom;
+				});
+				if (currentZone) {
+					elem && currentZone.appendChild(elem);
+				}
+			})
 	};
 	handler[movableElement.state]();
 
