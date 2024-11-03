@@ -9,6 +9,10 @@
 	position: relative;
 }
 
+.not-touch-action {
+	touch-action: none;
+}
+
 #movable {
 	border: 3px double red;
 	padding: 5px;
@@ -16,6 +20,14 @@
 	height: 100px;
 	background-color: blue;
 	z-index: 1000;
+}
+
+#movable:hover {
+	cursor: grab;
+}
+
+#movable:active {
+	cursor: grabbing;
 }
 
 .containerZone {

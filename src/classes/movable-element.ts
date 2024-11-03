@@ -26,7 +26,7 @@ export class MovableElment {
 		return this.$state;
 	}
 
-	private handleMouseDown = (event: MouseEvent) => {
+	private handleMouseDown = (event: PointerEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		if (this.element) {
@@ -36,10 +36,11 @@ export class MovableElment {
 				y: event.offsetY
 			};
 			document.addEventListener('pointermove', this.handleMouseMove);
+			document.addEventListener('pointerup', this.handleMouseUp);
 		}
 	};
 
-	private handleMouseMove = (event: MouseEvent) => {
+	private handleMouseMove = (event: PointerEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		if (this.element) {
@@ -48,7 +49,7 @@ export class MovableElment {
 		}
 	};
 
-	private handleMouseUp = (event: MouseEvent) => {
+	private handleMouseUp = (event: PointerEvent) => {
 		event.stopPropagation();
 		event.preventDefault();
 		if (this.element) {
@@ -66,14 +67,15 @@ export class MovableElment {
 	initMovable = (handler?: typeof this.handler) => {
 		this.handler = handler ?? null;
 		if (this.element) {
+			this.element.classList.add('not-touch-action');
 			this.element.addEventListener('pointerdown', this.handleMouseDown);
-			document.addEventListener('pointerup', this.handleMouseUp);
 		}
 		this.state = 'movable';
 	};
 
 	clearEventListener = () => {
 		if (this.element) {
+			this.element.classList.remove('not-touch-action');
 			document.removeEventListener('pointermove', this.handleMouseMove);
 			document.removeEventListener('pointerup', this.handleMouseUp);
 			this.element.removeEventListener('pointerdown', this.handleMouseDown);
